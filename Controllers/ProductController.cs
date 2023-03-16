@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ProductProjectAPI.Core;
+using ProductProjectAPI.Data;
 
 namespace ProductProjectAPI.Controllers
 {
@@ -8,6 +10,12 @@ namespace ProductProjectAPI.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
+        private readonly AppDbContext _context;
+        public ProductController(AppDbContext context)
+        {
+            _context = context;
+        }
+
         private static List<ProductEntity> _products { get; set; } = new List<ProductEntity>()
         {
               new ProductEntity()
@@ -44,7 +52,7 @@ namespace ProductProjectAPI.Controllers
         [HttpGet("getProducts")]
         public async Task<IActionResult> Get()
         {
-            return Ok(_products.ToList());
+            return Ok(await _context.Products.ToListAsync());
         }
         [HttpGet("getProducts/{id}")]
         public async Task<ActionResult<ProductEntity>> GetById(int id)
@@ -90,12 +98,12 @@ namespace ProductProjectAPI.Controllers
 
             try
             {
-                foreach(var i in id)
+                foreach (var i in id)
                 {
                     var product = _products.Find(x => x.Id == i);
                     _products.Remove(product);
                 }
-            
+
                 return Ok(_products);
             }
             catch (Exception ex)
